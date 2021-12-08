@@ -1,0 +1,9 @@
+21 August 2021 01:25pm
+
+Following points were discussed:
+
+1. In proctorship/masterproctorship, we are to show the countries that are attached to the currently logged in user's zone. (we are currently showing countries based on the region, if local, show countries in currently logged in user's zone. If global, show all countries).
+
+2. In preceptorship, we are to show the COEs based on:
+i) - if region is local, we only show COEs that fall in the countries of the currently logged in user's zone
+ii) - if region is global, we show all the COEs irrespective of the currently logged in user's zone.
