@@ -6,13 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('speakingevent', '0005_auto_20210915_1435'),
+        ("speakingevent", "0005_auto_20210915_1435"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='event',
-            name='activity_id',
-            field=models.CharField(blank=True, db_column='ActivityID', default=None, max_length=255, null=True),
+            model_name="event",
+            name="activity_id",
+            field=models.CharField(
+                blank=True,
+                db_column="ActivityID",
+                default=None,
+                max_length=255,
+                null=True,
+            ),
         ),
     ]

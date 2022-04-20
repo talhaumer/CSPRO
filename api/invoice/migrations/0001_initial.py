@@ -7,47 +7,164 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='AttendanceForm',
+            name="AttendanceForm",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_by', models.BigIntegerField(blank=True, db_column='CreatedBy', default=0, null=True)),
-                ('created_on', models.DateTimeField(auto_now_add=True, db_column='CreatedOn')),
-                ('modified_by', models.BigIntegerField(blank=True, db_column='ModifiedBy', default=0, null=True)),
-                ('modified_on', models.DateTimeField(auto_now=True, db_column='ModifiedOn')),
-                ('deleted_by', models.BigIntegerField(blank=True, db_column='DeletedBy', default=0, null=True)),
-                ('deleted_on', models.DateTimeField(auto_now=True, db_column='DeletedOn')),
-                ('status', models.BigIntegerField(db_column='Status', default=0, help_text='Be default 0 which has no meaning this field is used for making the status like pending approved and for some other purpose')),
-                ('attendance_form', models.FileField(blank=True, db_column='AttendanceForm', default=None, null=True, upload_to='uploads/')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.BigIntegerField(
+                        blank=True, db_column="CreatedBy", default=0, null=True
+                    ),
+                ),
+                (
+                    "created_on",
+                    models.DateTimeField(auto_now_add=True, db_column="CreatedOn"),
+                ),
+                (
+                    "modified_by",
+                    models.BigIntegerField(
+                        blank=True, db_column="ModifiedBy", default=0, null=True
+                    ),
+                ),
+                (
+                    "modified_on",
+                    models.DateTimeField(auto_now=True, db_column="ModifiedOn"),
+                ),
+                (
+                    "deleted_by",
+                    models.BigIntegerField(
+                        blank=True, db_column="DeletedBy", default=0, null=True
+                    ),
+                ),
+                (
+                    "deleted_on",
+                    models.DateTimeField(auto_now=True, db_column="DeletedOn"),
+                ),
+                (
+                    "status",
+                    models.BigIntegerField(
+                        db_column="Status",
+                        default=0,
+                        help_text="Be default 0 which has no meaning this field is used for making the status like pending approved and for some other purpose",
+                    ),
+                ),
+                (
+                    "attendance_form",
+                    models.FileField(
+                        blank=True,
+                        db_column="AttendanceForm",
+                        default=None,
+                        null=True,
+                        upload_to="uploads/",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'AttendanceForm',
+                "db_table": "AttendanceForm",
             },
         ),
         migrations.CreateModel(
-            name='Invoice',
+            name="Invoice",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_by', models.BigIntegerField(blank=True, db_column='CreatedBy', default=0, null=True)),
-                ('created_on', models.DateTimeField(auto_now_add=True, db_column='CreatedOn')),
-                ('modified_by', models.BigIntegerField(blank=True, db_column='ModifiedBy', default=0, null=True)),
-                ('modified_on', models.DateTimeField(auto_now=True, db_column='ModifiedOn')),
-                ('deleted_by', models.BigIntegerField(blank=True, db_column='DeletedBy', default=0, null=True)),
-                ('deleted_on', models.DateTimeField(auto_now=True, db_column='DeletedOn')),
-                ('status', models.BigIntegerField(db_column='Status', default=0, help_text='Be default 0 which has no meaning this field is used for making the status like pending approved and for some other purpose')),
-                ('invoice_number', models.CharField(blank=True, db_column='InvoiceNumber', default=None, max_length=255, null=True)),
-                ('fee_covered', models.CharField(db_column='FEECoveredbyMedicalAffair', default='', max_length=255)),
-                ('other_cost', models.CharField(db_column='OtherCostsCoveredByMedicalAffair', default='', max_length=255)),
-                ('invoice_date', models.DateField(db_column='DateOfInvoice', default=None)),
-                ('note', models.TextField(db_column='Note', default='')),
-                ('invoice_sent', models.BooleanField(db_column='InvoicesSentToTheAdministration', default=False)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.BigIntegerField(
+                        blank=True, db_column="CreatedBy", default=0, null=True
+                    ),
+                ),
+                (
+                    "created_on",
+                    models.DateTimeField(auto_now_add=True, db_column="CreatedOn"),
+                ),
+                (
+                    "modified_by",
+                    models.BigIntegerField(
+                        blank=True, db_column="ModifiedBy", default=0, null=True
+                    ),
+                ),
+                (
+                    "modified_on",
+                    models.DateTimeField(auto_now=True, db_column="ModifiedOn"),
+                ),
+                (
+                    "deleted_by",
+                    models.BigIntegerField(
+                        blank=True, db_column="DeletedBy", default=0, null=True
+                    ),
+                ),
+                (
+                    "deleted_on",
+                    models.DateTimeField(auto_now=True, db_column="DeletedOn"),
+                ),
+                (
+                    "status",
+                    models.BigIntegerField(
+                        db_column="Status",
+                        default=0,
+                        help_text="Be default 0 which has no meaning this field is used for making the status like pending approved and for some other purpose",
+                    ),
+                ),
+                (
+                    "invoice_number",
+                    models.CharField(
+                        blank=True,
+                        db_column="InvoiceNumber",
+                        default=None,
+                        max_length=255,
+                        null=True,
+                    ),
+                ),
+                (
+                    "fee_covered",
+                    models.CharField(
+                        db_column="FEECoveredbyMedicalAffair",
+                        default="",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "other_cost",
+                    models.CharField(
+                        db_column="OtherCostsCoveredByMedicalAffair",
+                        default="",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "invoice_date",
+                    models.DateField(db_column="DateOfInvoice", default=None),
+                ),
+                ("note", models.TextField(db_column="Note", default="")),
+                (
+                    "invoice_sent",
+                    models.BooleanField(
+                        db_column="InvoicesSentToTheAdministration", default=False
+                    ),
+                ),
             ],
             options={
-                'db_table': 'Invoice',
+                "db_table": "Invoice",
             },
         ),
     ]

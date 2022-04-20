@@ -6,18 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0001_initial'),
-        ('speakingevent', '0003_auto_20210910_1209'),
+        ("api", "0001_initial"),
+        ("speakingevent", "0003_auto_20210910_1209"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='cognosid',
-            name='cognos',
+            model_name="cognosid",
+            name="cognos",
         ),
         migrations.AddField(
-            model_name='cognosid',
-            name='cognos',
-            field=models.ManyToManyField(db_column='CognosID', default=None, null=True, related_name='cognos_id_speaker', to='api.Hospital'),
+            model_name="cognosid",
+            name="cognos",
+            field=models.ManyToManyField(
+                db_column="CognosID",
+                default=None,
+                null=True,
+                related_name="cognos_id_speaker",
+                to="api.Hospital",
+            ),
         ),
     ]

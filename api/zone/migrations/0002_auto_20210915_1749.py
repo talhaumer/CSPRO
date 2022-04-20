@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('zone', '0001_initial'),
+        ("zone", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='zone',
-            name='status',
-            field=models.BooleanField(db_column='ZoneStatus', default=True),
+            model_name="zone",
+            name="status",
+            field=models.BooleanField(db_column="ZoneStatus", default=True),
         ),
     ]

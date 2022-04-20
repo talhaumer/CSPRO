@@ -1,25 +1,24 @@
-from datetime import datetime
 import json
 import os
+from datetime import datetime
+
 import django
-
 from django.utils.text import slugify
-
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cspro.settings.settings")
 django.setup()
 
-import threading
 import csv
+import threading
+
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.db import transaction
-from api.zone.models import Countries
-from api.models import Hospital, Languages
-from api.proctors.models import ProctorsHospital, Proctors
-from api.users.models import User, Role
-
-
 from django.utils.text import slugify
+
+from api.models import Hospital, Languages
+from api.proctors.models import Proctors, ProctorsHospital
+from api.users.models import Role, User
+from api.zone.models import Countries
 
 
 def add_proctors_thread():
@@ -30,9 +29,9 @@ def add_proctors_thread():
 def proctors():
     try:
         print("==========Add Hospitals=============")
-        file_path = staticfiles_storage.path('proctors.csv')
+        file_path = staticfiles_storage.path("proctors.csv")
         with open(file_path, errors="replace") as csv_file:
-            zone = csv.reader(csv_file, delimiter=',')
+            zone = csv.reader(csv_file, delimiter=",")
             line_count = 0
             for row in zone:
                 if line_count == 0:
@@ -41,12 +40,12 @@ def proctors():
                 else:
                     if get_or_create_proctors(row):
                         print("Proctors Saved Successfully")
-                    else :
+                    else:
                         print("Proctors Already Existed")
 
                     line_count += 1
     except Exception as e:
-        print(f'Error : {e}')
+        print(f"Error : {e}")
         return e
 
 
@@ -78,30 +77,34 @@ def get_or_create_proctors(data):
         if int(data[12]) == 0:
             only_speaker = False
 
-        contract_starting_details  = None
+        contract_starting_details = None
         if str(data[13]) != "NULL":
-            contract_starting_details = datetime.strptime(str(data[13]), '%m/%d/%Y')
+            contract_starting_details = datetime.strptime(str(data[13]), "%m/%d/%Y")
 
         contract_ending_details = None
         if str(data[14]) != "NULL":
-            contract_ending_details = datetime.strptime(str(data[14]), '%m/%d/%Y')
+            contract_ending_details = datetime.strptime(str(data[14]), "%m/%d/%Y")
         resume = str(data[15])
 
         proctorShip_contract_start_details = None
         if str(data[16]) != "NULL":
-            proctorShip_contract_start_details = datetime.strptime(str(data[16]), '%m/%d/%Y')
+            proctorShip_contract_start_details = datetime.strptime(
+                str(data[16]), "%m/%d/%Y"
+            )
 
         proctorShip_contract_ending_details = None
         if str(data[17]) != "NULL":
-            proctorShip_contract_ending_details = datetime.strptime(str(data[17]), '%m/%d/%Y')
+            proctorShip_contract_ending_details = datetime.strptime(
+                str(data[17]), "%m/%d/%Y"
+            )
 
         unavailability_start_date = None
         if str(data[18]) != "NULL":
-            unavailability_start_date = datetime.strptime(str(data[18]), '%m/%d/%Y')
+            unavailability_start_date = datetime.strptime(str(data[18]), "%m/%d/%Y")
 
         unavailability_end_date = None
         if str(data[19]) != "NULL":
-            unavailability_end_date = datetime.strptime(str(data[19]), '%m/%d/%Y')
+            unavailability_end_date = datetime.strptime(str(data[19]), "%m/%d/%Y")
 
         reason = str(data[20])
 
@@ -114,17 +117,35 @@ def get_or_create_proctors(data):
 
         with transaction.atomic():
             user = User.objects.create(
-                **{"name": name, "is_active": is_active, "email": email, "image": image, "role": role,
-                   "country": Countries.objects.get(id=country)})
+                **{
+                    "name": name,
+                    "is_active": is_active,
+                    "email": email,
+                    "image": image,
+                    "role": role,
+                    "country": Countries.objects.get(id=country),
+                }
+            )
 
-            proctors = Proctors.objects.create(**{
-                "id": proctor_id, "user": user, "telephone": telephone, "publication": publication,
-                "note": note, "only_speaker": only_speaker, "contract_starting_details": contract_starting_details,
-                "contract_ending_details": contract_ending_details, "resume": resume,
-                "proctorShip_contract_start_details": proctorShip_contract_start_details,
-                "proctorShip_contract_ending_details": proctorShip_contract_ending_details,
-                "unavailability_start_date": unavailability_start_date,
-                "unavailability_end_date": unavailability_end_date, "is_masterproctorship": is_masterproctorship, "reason_why":reason})
+            proctors = Proctors.objects.create(
+                **{
+                    "id": proctor_id,
+                    "user": user,
+                    "telephone": telephone,
+                    "publication": publication,
+                    "note": note,
+                    "only_speaker": only_speaker,
+                    "contract_starting_details": contract_starting_details,
+                    "contract_ending_details": contract_ending_details,
+                    "resume": resume,
+                    "proctorShip_contract_start_details": proctorShip_contract_start_details,
+                    "proctorShip_contract_ending_details": proctorShip_contract_ending_details,
+                    "unavailability_start_date": unavailability_start_date,
+                    "unavailability_end_date": unavailability_end_date,
+                    "is_masterproctorship": is_masterproctorship,
+                    "reason_why": reason,
+                }
+            )
 
             proctors.area_of_experties.add(*area_of_experties)
             for each in spoken_languages:
@@ -133,11 +154,14 @@ def get_or_create_proctors(data):
             proctors.approach.add(*approach)
             proctors.products.add(*products)
 
-            ProctorsHospital.objects.create(**{"proctors": proctors, "hospital": Hospital.objects.get(id=hospital)})
+            ProctorsHospital.objects.create(
+                **{"proctors": proctors, "hospital": Hospital.objects.get(id=hospital)}
+            )
 
             user.save()
             return True
     except Exception as e:
         print(str(e))
+
 
 add_proctors_thread()

@@ -1,10 +1,12 @@
-from oauth2_provider.models import RefreshToken
-from .models import User, UserInfo, Role
-from django.db import transaction
-from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
+from django.db import transaction
+from oauth2_provider.models import RefreshToken
+from rest_framework import serializers
+
 from api.zone.models import Countries, Zone
+
+from .models import Role, User, UserInfo
 
 
 class AuthenticateSerializer(serializers.ModelSerializer):
@@ -13,7 +15,7 @@ class AuthenticateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password')
+        fields = ("email", "password")
 
 
 class UserViewSerializer(serializers.ModelSerializer):
@@ -28,7 +30,17 @@ class UserViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserInfo
-        fields = ['id', 'mail_notification', 'zone', 'image', 'role', 'email', 'country', 'name', 'is_active']
+        fields = [
+            "id",
+            "mail_notification",
+            "zone",
+            "image",
+            "role",
+            "email",
+            "country",
+            "name",
+            "is_active",
+        ]
 
     def get_zone(self, obj):
         try:
@@ -72,22 +84,37 @@ class UserSerializer(serializers.ModelSerializer):
     zone_id = serializers.IntegerField(write_only=True)
     country_id = serializers.IntegerField(write_only=True)
     mail_notification = serializers.BooleanField(write_only=True)
-    image = serializers.ImageField(required=True, allow_null=True, allow_empty_file=True)
+    image = serializers.ImageField(
+        required=True, allow_null=True, allow_empty_file=True
+    )
     is_active = serializers.BooleanField(required=True)
     user_info = serializers.SerializerMethodField(read_only=True)
     country = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'role', 'role_code', 'country', 'mail_notification', 'user_info', 'image', 'is_active',
-                  'country_id', 'zone_id', 'role', 'name', 'email']
+        fields = [
+            "id",
+            "role",
+            "role_code",
+            "country",
+            "mail_notification",
+            "user_info",
+            "image",
+            "is_active",
+            "country_id",
+            "zone_id",
+            "role",
+            "name",
+            "email",
+        ]
 
     def create(self, validated_data):
         with transaction.atomic():
             mail_notification = validated_data.pop("mail_notification")
-            zone_id = validated_data.pop('zone_id')
-            role_code = validated_data.pop('role_code')
-            validated_data['role'] = Role.objects.get(code=role_code)
+            zone_id = validated_data.pop("zone_id")
+            role_code = validated_data.pop("role_code")
+            validated_data["role"] = Role.objects.get(code=role_code)
             user = User.objects.create(**validated_data)
             adm_usr = {}
             adm_usr["user"] = user
@@ -119,30 +146,29 @@ class PasswordSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['password']
+        fields = ["password"]
 
 
 class UpdateProfileSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
-    # password = serializers.CharField(write_only=False)
     mail_notification = serializers.BooleanField(required=False)
     image = serializers.ImageField(required=False)
 
     class Meta:
         model = User
-        fields = ['id', 'name', 'image', 'mail_notification']
+        fields = ["id", "name", "image", "mail_notification"]
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
+        instance.name = validated_data.get("name", instance.name)
 
         if "image" in validated_data.keys():
-            instance.image = validated_data.get('image', instance.image)
+            instance.image = validated_data.get("image", instance.image)
 
         if "mail_notification" in validated_data.keys():
             UserInfo.objects.filter(user__id=instance.id).update(
-                mail_notification=validated_data.pop('mail_notification'))
+                mail_notification=validated_data.pop("mail_notification")
+            )
 
-        # instance.set_password(validated_data.pop('password'))
         instance.save()
         return instance
 
@@ -162,11 +188,9 @@ class UserLoginSerializer(serializers.Serializer):
         pass
 
     def validate(self, data):
-        email = data['email']
-        password = data['password']
+        email = data["email"]
+        password = data["password"]
         user = authenticate(email=email, password=password)
-        # for data in user:
-        # 	print(data)
 
         if user is None:
             raise serializers.ValidationError("Invalid login credentials")
@@ -178,11 +202,11 @@ class UserLoginSerializer(serializers.Serializer):
 
             update_last_login(None, user)
             validation = {
-                'access': access_token,
-                'refresh': refresh_token,
-                'email': user.email,
-                'role': user.role,
-                'id': user.id,
+                "access": access_token,
+                "refresh": refresh_token,
+                "email": user.email,
+                "role": user.role,
+                "id": user.id,
             }
             return validation
         except User.DoesNotExist:
@@ -204,38 +228,50 @@ class UserFormUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'image', 'role_code', 'is_active', 'mail_notification', 'country_id', 'zone_id', 'password',
-                  'role', 'name', 'email']
+        fields = [
+            "id",
+            "image",
+            "role_code",
+            "is_active",
+            "mail_notification",
+            "country_id",
+            "zone_id",
+            "password",
+            "role",
+            "name",
+            "email",
+        ]
 
     def update(self, instance, validated_data):
         try:
-            instance.name = validated_data.get('name', instance.name)
+            instance.name = validated_data.get("name", instance.name)
             if "image" in validated_data.keys():
-                image = validated_data.pop('image')
-                validated_data['image'] = image
-                instance.image = validated_data.get('image', instance.image)
-            # instance.role = validated_data.get('role', instance.role)
+                image = validated_data.pop("image")
+                validated_data["image"] = image
+                instance.image = validated_data.get("image", instance.image)
 
-            instance.is_active = validated_data.get('is_active', instance.is_active)
+            instance.is_active = validated_data.get("is_active", instance.is_active)
 
-            # if 'email' in validated_data.keys():
-            #     instance.email = validated_data.get('email', instance.email)
-
-            if 'role_code' in validated_data.keys():
-                validated_data['role'] = Role.objects.get(code=validated_data.pop('role_code'))
-                instance.role = validated_data.get('role', instance.role)
+            if "role_code" in validated_data.keys():
+                validated_data["role"] = Role.objects.get(
+                    code=validated_data.pop("role_code")
+                )
+                instance.role = validated_data.get("role", instance.role)
 
             if "country_id" in validated_data.keys():
-                validated_data['country'] = Countries.objects.get(pk=validated_data.pop('country_id'))
-                instance.country = validated_data.get('country', instance.country)
+                validated_data["country"] = Countries.objects.get(
+                    pk=validated_data.pop("country_id")
+                )
+                instance.country = validated_data.get("country", instance.country)
 
             if "zone_id" in validated_data.keys():
-                zone_obj = Zone.objects.get(id = validated_data.pop('zone_id'))
+                zone_obj = Zone.objects.get(id=validated_data.pop("zone_id"))
                 UserInfo.objects.filter(user__id=instance.id).update(zone=zone_obj)
 
             if "mail_notification" in validated_data.keys():
                 UserInfo.objects.filter(user__id=instance.id).update(
-                    mail_notification=validated_data.pop('mail_notification'))
+                    mail_notification=validated_data.pop("mail_notification")
+                )
 
             instance.save()
             return instance
@@ -255,17 +291,14 @@ class UserFormUpdateSerializer(serializers.ModelSerializer):
             return None
 
 
-
 class UpdateProfileDataSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
-    # password = serializers.CharField(write_only=False)
     mail_notification = serializers.SerializerMethodField(read_only=True)
     image = serializers.ImageField(required=False)
 
     class Meta:
         model = User
-        fields = ['name', 'image', 'mail_notification']
-
+        fields = ["name", "image", "mail_notification"]
 
     def get_mail_notification(self, obj):
         try:
@@ -281,6 +314,3 @@ class ChangePasswordSerializer(serializers.Serializer):
     class Meta:
         model = User
         fields = ["old_password", "new_password"]
-
-
-

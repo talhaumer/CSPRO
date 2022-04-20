@@ -1,5 +1,6 @@
 from django.contrib import admin
-from api.proctorship.models import Proctorship, ConstantData
+
+from api.proctorship.models import ConstantData, Proctorship
 
 # Register your models here.
 admin.site.register(Proctorship)

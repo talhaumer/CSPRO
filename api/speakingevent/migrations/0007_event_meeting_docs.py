@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('speakingevent', '0006_event_activity_id'),
+        ("speakingevent", "0006_event_activity_id"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='event',
-            name='meeting_docs',
-            field=models.FileField(blank=True, db_column='MeetingDocs', null=True, upload_to='uploads/'),
+            model_name="event",
+            name="meeting_docs",
+            field=models.FileField(
+                blank=True, db_column="MeetingDocs", null=True, upload_to="uploads/"
+            ),
         ),
     ]

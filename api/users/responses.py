@@ -1,32 +1,32 @@
 import requests
 from django.conf import settings
-from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from requests.auth import HTTPBasicAuth
-from rest_framework import authentication, permissions, status
+from rest_framework import status
 from rest_framework.parsers import FileUploadParser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import is_server_error
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
 
 class BaseAPIView(APIView):
     """
     Base class for API views.
     """
+
     authentication_classes = ()
     permission_classes = (IsAuthenticated,)
 
     def send_response(
-            self,
-            success=False,
-            code='',
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            payload={},
-            description='',
-            exception=None,
-            count = 0,
-            log_description = ""
+        self,
+        success=False,
+        code="",
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        payload={},
+        description="",
+        exception=None,
+        count=0,
+        log_description="",
     ):
         """
         Generates response.
@@ -40,27 +40,28 @@ class BaseAPIView(APIView):
         """
         if not success and is_server_error(status_code):
             if settings.DEBUG:
-                description = f'error message: {description}'
+                description = f"error message: {description}"
             else:
-                description = 'Internal server error.'
+                description = "Internal server error."
         return Response(
             data={
-                'success': success,
-                'code': code,
-                'payload': payload,
-                'description': description,
-                'count': count
+                "success": success,
+                "code": code,
+                "payload": payload,
+                "description": description,
+                "count": count,
             },
-            status=status_code
+            status=status_code,
         )
 
     def send_data_response(
-            self,
-            success=False,
-            code='',
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            payload={},
-            description=''):
+        self,
+        success=False,
+        code="",
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        payload={},
+        description="",
+    ):
         """
         Generates response for data tables.
         :param success: bool tells if call is successful or not.
@@ -72,72 +73,53 @@ class BaseAPIView(APIView):
         """
         if not success and is_server_error(status_code):
             if settings.DEBUG:
-                description = f'error message: {description}'
+                description = f"error message: {description}"
             else:
-                description = 'Internal server error.'
+                description = "Internal server error."
         return Response(
             data={
-                'data': {
-                    'success': success,
-                    'code': code,
-                    'payload': payload,
-                    'description': description}
+                "data": {
+                    "success": success,
+                    "code": code,
+                    "payload": payload,
+                    "description": description,
+                }
             },
-            status=status_code
+            status=status_code,
         )
 
     @staticmethod
-    def get_oauth_token(email='', password='', grant_type='password'):
+    def get_oauth_token(email="", password="", grant_type="password"):
         try:
             url = settings.AUTHORIZATION_SERVER_URL
             # url ='http://192.168.100.10:8000/api/oauth/token/'
-            headers = {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-            data = {
-                'username': email,
-                'password': password,
-                'grant_type': grant_type
-            }
-            auth = HTTPBasicAuth(
-                settings.OAUTH_CLIENT_ID,
-                settings.OAUTH_CLIENT_SECRET
-            )
-            response = requests.post(
-                url=url,
-                headers=headers,
-                data=data,
-                auth=auth
-            )
+            headers = {"Content-Type": "application/x-www-form-urlencoded"}
+            data = {"username": email, "password": password, "grant_type": grant_type}
+            auth = HTTPBasicAuth(settings.OAUTH_CLIENT_ID, settings.OAUTH_CLIENT_SECRET)
+            response = requests.post(url=url, headers=headers, data=data, auth=auth)
             if response.ok:
                 json_response = response.json()
                 return {
-                    'access_token': json_response.get('access_token', ''),
-                    'refresh_token': json_response.get('refresh_token', '')
+                    "access_token": json_response.get("access_token", ""),
+                    "refresh_token": json_response.get("refresh_token", ""),
                 }
             else:
-                return {'error': response.json().get('error')}
+                return {"error": response.json().get("error")}
         except Exception as e:
             # fixme: Add logger to log this exception
-            return {'exception': str(e)}
+            return {"exception": str(e)}
 
     @staticmethod
     def revoke_oauth_token(token):
         try:
             url = settings.REVOKE_TOKEN_URL
-            headers = {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
+            headers = {"Content-Type": "application/x-www-form-urlencoded"}
             data = {
-                'token': token,
-                'client_secret': settings.OAUTH_CLIENT_SECRET,
-                'client_id': settings.OAUTH_CLIENT_ID
+                "token": token,
+                "client_secret": settings.OAUTH_CLIENT_SECRET,
+                "client_id": settings.OAUTH_CLIENT_ID,
             }
-            response = requests.post(
-                url=url,
-                headers=headers,
-                data=data
-            )
+            response = requests.post(url=url, headers=headers, data=data)
             if response.ok:
                 return True
             else:
@@ -146,7 +128,7 @@ class BaseAPIView(APIView):
             # fixme: Add logger to log this exception
             return False
 
-    def get_lookupid_by_code(self, code, lookup_category='',general=False):
+    def get_lookupid_by_code(self, code, lookup_category="", general=False):
         """
         Search the given code in main.Lookup table, and
         returns the row id or 0 (as zero means no data found)
@@ -156,7 +138,9 @@ class BaseAPIView(APIView):
         """
         if general:
             if lookup_category:
-                lookup_obj = Lookup.objects.filter(lookup_category__code__exact=lookup_category, code=code).first()
+                lookup_obj = Lookup.objects.filter(
+                    lookup_category__code__exact=lookup_category, code=code
+                ).first()
             else:
                 # lookup_obj = Lookup.objects.filter(code=code, lookup_category_id__in=lookup_cat).first()
                 lookup_obj = Lookup.objects.filter(code=code).first()
@@ -166,17 +150,23 @@ class BaseAPIView(APIView):
         else:
             lookup_cat = LookupCategory.objects.filter(parent_id=19).values_list("id")
             if lookup_category:
-                lookup_obj = Lookup.objects.filter(lookup_category__code__exact=lookup_category, code=code).first()
+                lookup_obj = Lookup.objects.filter(
+                    lookup_category__code__exact=lookup_category, code=code
+                ).first()
             else:
-                lookup_obj = Lookup.objects.filter(code=code,lookup_category_id__in=lookup_cat).first()
+                lookup_obj = Lookup.objects.filter(
+                    code=code, lookup_category_id__in=lookup_cat
+                ).first()
                 # lookup_obj = Lookup.objects.filter(code=code).first()
             if lookup_obj:
                 return lookup_obj.id
             if lookup_obj is None:
-                return Lookup.objects.filter(lookup_category__code__exact=lookup_category)
+                return Lookup.objects.filter(
+                    lookup_category__code__exact=lookup_category
+                )
             return 0
 
-    def get_lookupids(self, codes=[], lookup_category=''):
+    def get_lookupids(self, codes=[], lookup_category=""):
         """
         Search the given codes in main.Lookup table and
         returns the row ids.
@@ -185,18 +175,20 @@ class BaseAPIView(APIView):
         :rtype: list
         """
         if lookup_category:
-            lookups = Lookup.objects.filter(lookup_category__code__exact=lookup_category, code__in=codes)
+            lookups = Lookup.objects.filter(
+                lookup_category__code__exact=lookup_category, code__in=codes
+            )
         else:
             lookups = Lookup.objects.filter(code__in=codes)
         if lookups.exists():
-            return lookups.values_list('pk', flat=True)
+            return lookups.values_list("pk", flat=True)
         return []
 
-    def get_lookups(self, code=''):
+    def get_lookups(self, code=""):
         lookups = Lookup.objects.filter(lookup_category__code__exact=code)
         print(lookups)
         if lookups.exists():
-            return lookups.values_list('pk', flat=True)
+            return lookups.values_list("pk", flat=True)
         return []
 
     def is_dealer(self):
@@ -212,119 +204,21 @@ class BaseAPIView(APIView):
         :return: True if dealer or tenant otherwise False
         """
         try:
-            return self.request.user.roles.first().role.access_level < AccessLevel.SITE_MANAGER
+            return (
+                self.request.user.roles.first().role.access_level
+                < AccessLevel.SITE_MANAGER
+            )
         except:
             return True
 
     def verify_fb_user(self, user):
-        if user.provider == user.FACEBOOK and user.username.startswith(f'{user.id}{000}'):
+        if user.provider == user.FACEBOOK and user.username.startswith(
+            f"{user.id}{000}"
+        ):
             # This means social user has not updated his number yet
             return True
         return False
 
 
-# class LocationView(BaseAPIView):
-#     """
-#     API View for getting the list of Locations and created location.
-#     """
-#
-#     def get(self):
-#         try:
-#             location = Location.objects.all()
-#             serializer = LocationSerializer(location, many=True)
-#             return self.send_response(
-#                 success=True,
-#                 code=f'200.{ModuleCode.USERS}.{MessageTypeCode.SUCCESS}',
-#                 status_code=status.HTTP_200_OK,
-#                 payload=serializer.data,
-#                 description='List of locations'
-#             )
-#         except Exception as e:
-#             return self.send_response(
-#                 success=False,
-#                 code=f'500.{ModuleCode.USERS}.{MessageTypeCode.EXCEPTION}',
-#                 description=str(e)
-#             )
-#
-#     def post(self, request):
-#         """
-#         Creates a new user in the system.
-#         """
-#         try:
-#             serializer = LocationSerializer(data=request.data)
-#             if serializer.is_valid():
-#                 location_saved = serializer.save()
-#                 return self.send_response(
-#                     success=True,
-#                     code=f'201.{ModuleCode.USERS}.{MessageTypeCode.SUCCESS}',
-#                     status_code=status.HTTP_201_CREATED,
-#                     payload={'location_id': location_saved.id},
-#                     description='Location object created successfully'
-#                 )
-#             else:
-#                 return self.send_response(
-#                     code=f'422.{ModuleCode.USERS}.{MessageTypeCode.ERROR}',
-#                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-#                     description=serializer.errors
-#                 )
-#         except Exception as e:
-#             return self.send_response(
-#                 code=f'500.{ModuleCode.USERS}.{MessageTypeCode.EXCEPTION}',
-#                 description=str(e)
-#             )
-#
-#
-# class LookupCategoryView(BaseAPIView):
-#     """
-#     API View for getting the list of Lookup Categories and created LookupCategory.
-#     """
-#
-#     def get(self):
-#         try:
-#             lookup_category = LookupCategory.objects.all()
-#             serializer = LookupCategorySerializer(lookup_category, many=True)
-#             return self.send_response(
-#                 success=True,
-#                 code=f'200.{ModuleCode.USERS}.{MessageTypeCode.SUCCESS}',
-#                 status_code=status.HTTP_200_OK,
-#                 payload=serializer.data,
-#                 description='List of LookupCategory'
-#             )
-#         except Exception as e:
-#             return self.send_response(
-#                 success=False,
-#                 code=f'500.{ModuleCode.USERS}.{MessageTypeCode.EXCEPTION}',
-#                 description=str(e)
-#             )
-#
-#     def post(self, request):
-#         """
-#         Creates a new user in the system.
-#         """
-#         try:
-#             serializer = LookupCategorySerializer(data=request.data)
-#             if serializer.is_valid():
-#                 lookup_category_saved = serializer.save()
-#                 return self.send_response(
-#                     success=True,
-#                     code=f'201.{ModuleCode.USERS}.{MessageTypeCode.SUCCESS}',
-#                     status_code=status.HTTP_201_CREATED,
-#                     payload={'lookup_category_id': lookup_category_saved.id},
-#                     description='LookupCategory object created successfully'
-#                 )
-#             else:
-#                 return self.send_response(
-#                     code=f'422.{ModuleCode.USERS}.{MessageTypeCode.ERROR}',
-#                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-#                     description=serializer.errors
-#                 )
-#         except Exception as e:
-#             return self.send_response(
-#                 code=f'500.{ModuleCode.USERS}.{MessageTypeCode.EXCEPTION}',
-#                 description=str(e)
-#             )
-#
-#
-
 class ImageUploadParser(FileUploadParser):
-    media_type = 'image/*'
+    media_type = "image/*"

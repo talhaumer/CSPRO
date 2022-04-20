@@ -1,15 +1,19 @@
 from django.db import transaction
 from rest_framework import serializers
-from api.proctorship.models import Proctorship, ConstantData
-from api.models import Products
+
+from api.models import Hospital, Products
 from api.proctors.models import Proctors
-from api.status.models import Status, StatusConstantData, Proposal, ProctorshipProctors
-from api.trainee.serializers import TrainSerializer
+from api.proctorship.models import ConstantData, Proctorship
+from api.status.models import ProctorshipProctors, Proposal, Status, StatusConstantData
+from api.status.serializers import (
+    ProctorshipProctorsSerializer,
+    StatusSerializer,
+    StatusViewSerializer,
+)
 from api.trainee.models import TraineeProfile
-from api.models import Hospital
-from api.zone.models import Countries, ZoneCountries
+from api.trainee.serializers import TrainSerializer
 from api.users.models import User
-from api.status.serializers import StatusSerializer, StatusViewSerializer, ProctorshipProctorsSerializer
+from api.zone.models import Countries, ZoneCountries
 from cspro.utils import activity_id
 
 
@@ -21,16 +25,25 @@ class ProctorshipSerializer(serializers.ModelSerializer):
     secondary_product = serializers.SerializerMethodField(read_only=True)
     proctor = serializers.SerializerMethodField(read_only=True)
     note = serializers.CharField(required=True, allow_null=True, allow_blank=True)
-    # activity_area_type = serializers.CharField(required = True)
     training_type = serializers.CharField(required=True)
-    types_of_first_training = serializers.CharField(required=True, allow_null=True, allow_blank=True)
+    types_of_first_training = serializers.CharField(
+        required=True, allow_null=True, allow_blank=True
+    )
     new_center = serializers.CharField(required=True, allow_null=True, allow_blank=True)
-    type_advance_training = serializers.CharField(required=True, allow_blank=True, allow_null=True)
-    specific_training = serializers.CharField(required=True, allow_blank=True, allow_null=True)
+    type_advance_training = serializers.CharField(
+        required=True, allow_blank=True, allow_null=True
+    )
+    specific_training = serializers.CharField(
+        required=True, allow_blank=True, allow_null=True
+    )
     other_num_of_implants = serializers.IntegerField(default=0, allow_null=True)
     ETQ_number = serializers.IntegerField(default=0, allow_null=True)
-    not_implant_regularly = serializers.CharField(required=True, allow_blank=True, allow_null=True)
-    other_advanced_training = serializers.CharField(required=True, allow_blank=True, allow_null=True)
+    not_implant_regularly = serializers.CharField(
+        required=True, allow_blank=True, allow_null=True
+    )
+    other_advanced_training = serializers.CharField(
+        required=True, allow_blank=True, allow_null=True
+    )
     memo_surgeon_implant = serializers.IntegerField(default=0, allow_null=True)
     rechord_surgeon_implant = serializers.IntegerField(default=0, allow_null=True)
     issue = serializers.CharField(required=True, allow_blank=True, allow_null=True)
@@ -50,7 +63,9 @@ class ProctorshipSerializer(serializers.ModelSerializer):
     trainees = serializers.SerializerMethodField(read_only=True)
     is_global = serializers.BooleanField(required=True, allow_null=True)
     zone_id = serializers.IntegerField(write_only=True, allow_null=True)
-    note_related_to_proctor = serializers.CharField(required=True, allow_null=True, allow_blank=True)
+    note_related_to_proctor = serializers.CharField(
+        required=True, allow_null=True, allow_blank=True
+    )
     first_proctorship_num = serializers.IntegerField(required=False, allow_null=True)
 
     class Meta:
@@ -60,21 +75,21 @@ class ProctorshipSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         try:
             with transaction.atomic():
-                training_type = validated_data.pop('training_type')
-                start_date = validated_data.pop('start_date')
-                end_date = validated_data.pop('end_date')
-                user_id = validated_data.pop('user_id')
-                new_center = validated_data.pop('new_center')
-                types_of_first_training = validated_data.pop('types_of_first_training')
-                type_advance_training = validated_data.pop('type_advance_training')
-                other_advanced_training = validated_data.pop('other_advanced_training')
-                specific_training = validated_data.pop('specific_training')
-                not_implant_regularly = validated_data.pop('not_implant_regularly')
-                zone_countries_id = validated_data.pop('zone_countries_id')
-                zone_id = validated_data.pop('zone_id')
-                trainee = validated_data.pop('trainee_profile')
-                proctor_id = validated_data.pop('proctor_id')
-                validated_data['user_id'] = user_id
+                training_type = validated_data.pop("training_type")
+                start_date = validated_data.pop("start_date")
+                end_date = validated_data.pop("end_date")
+                user_id = validated_data.pop("user_id")
+                new_center = validated_data.pop("new_center")
+                types_of_first_training = validated_data.pop("types_of_first_training")
+                type_advance_training = validated_data.pop("type_advance_training")
+                other_advanced_training = validated_data.pop("other_advanced_training")
+                specific_training = validated_data.pop("specific_training")
+                not_implant_regularly = validated_data.pop("not_implant_regularly")
+                zone_countries_id = validated_data.pop("zone_countries_id")
+                zone_id = validated_data.pop("zone_id")
+                trainee = validated_data.pop("trainee_profile")
+                proctor_id = validated_data.pop("proctor_id")
+                validated_data["user_id"] = user_id
 
                 proctorship = Proctorship.objects.create(**validated_data)
 
@@ -85,59 +100,87 @@ class ProctorshipSerializer(serializers.ModelSerializer):
                 proctorship.activity_id = activity_id(char, num)
 
                 if training_type:
-                    proctorship.training_type = ConstantData.objects.get(code=training_type)
+                    proctorship.training_type = ConstantData.objects.get(
+                        code=training_type
+                    )
 
                 if types_of_first_training:
-                    proctorship.types_of_first_training = ConstantData.objects.get(code=types_of_first_training)
+                    proctorship.types_of_first_training = ConstantData.objects.get(
+                        code=types_of_first_training
+                    )
 
                 if type_advance_training:
-                    proctorship.type_advance_training = ConstantData.objects.get(code=type_advance_training)
+                    proctorship.type_advance_training = ConstantData.objects.get(
+                        code=type_advance_training
+                    )
 
                 if other_advanced_training:
-                    proctorship.other_advanced_training = ConstantData.objects.get(code=other_advanced_training)
+                    proctorship.other_advanced_training = ConstantData.objects.get(
+                        code=other_advanced_training
+                    )
                 if specific_training:
-                    proctorship.specific_training = ConstantData.objects.get(code=specific_training)
+                    proctorship.specific_training = ConstantData.objects.get(
+                        code=specific_training
+                    )
 
                 if not_implant_regularly:
-                    proctorship.not_implant_regularly = ConstantData.objects.get(code=not_implant_regularly)
+                    proctorship.not_implant_regularly = ConstantData.objects.get(
+                        code=not_implant_regularly
+                    )
 
                 if new_center:
                     proctorship.new_center = ConstantData.objects.get(code=new_center)
 
                 if zone_countries_id and zone_id:
-                    proctorship.zone_countries = ZoneCountries.objects.get(zone__id=zone_id,
-                                                                           countries__id=zone_countries_id, status=True)
+                    proctorship.zone_countries = ZoneCountries.objects.get(
+                        zone__id=zone_id, countries__id=zone_countries_id, status=True
+                    )
 
                 for trainee_profile in trainee:
                     TraineeProfile.objects.create(
                         proctorship=proctorship,
-                        name=trainee_profile['name'],
-                        surname=trainee_profile['surname'],
-                        title=ConstantData.objects.get(code=trainee_profile['title']),
-                        mvr_case_per_year=trainee_profile['mvr_case_per_year'],
-                        current_preferential=ConstantData.objects.get(code=trainee_profile['current_preferential']),
-                        mvr_case_per_year_by_trainee=trainee_profile['mvr_case_per_year_by_trainee'],
-                        note=trainee_profile['note'],
-                        corcym_accompanying_rep=trainee_profile['corcym_accompanying_rep'],
-                        country=Countries.objects.get(id=trainee_profile['country_id']),
-                        hospital=Hospital.objects.get(id=trainee_profile['hospital_id']),
-                        interest_invasive=trainee_profile['interest_invasive'],
-                        status=True
+                        name=trainee_profile["name"],
+                        surname=trainee_profile["surname"],
+                        title=ConstantData.objects.get(code=trainee_profile["title"]),
+                        mvr_case_per_year=trainee_profile["mvr_case_per_year"],
+                        current_preferential=ConstantData.objects.get(
+                            code=trainee_profile["current_preferential"]
+                        ),
+                        mvr_case_per_year_by_trainee=trainee_profile[
+                            "mvr_case_per_year_by_trainee"
+                        ],
+                        note=trainee_profile["note"],
+                        corcym_accompanying_rep=trainee_profile[
+                            "corcym_accompanying_rep"
+                        ],
+                        country=Countries.objects.get(id=trainee_profile["country_id"]),
+                        hospital=Hospital.objects.get(
+                            id=trainee_profile["hospital_id"]
+                        ),
+                        interest_invasive=trainee_profile["interest_invasive"],
+                        status=True,
                     )
 
-                status_data = {'status': StatusConstantData.objects.get(code='pending'),
-                               'proctorship_activity': proctorship, 'user': User.objects.get(id=user_id)}
+                status_data = {
+                    "status": StatusConstantData.objects.get(code="pending"),
+                    "proctorship_activity": proctorship,
+                    "user": User.objects.get(id=user_id),
+                }
                 status_data = Status.objects.create(**status_data)
                 if start_date and end_date:
-                    dates = {'start_date': start_date, 'end_date': end_date, 'status': status_data}
+                    dates = {
+                        "start_date": start_date,
+                        "end_date": end_date,
+                        "status": status_data,
+                    }
                     dates = Proposal.objects.create(**dates)
 
                 if proctor_id:
                     for each in range(len(proctor_id)):
                         proctors = {
-                            'porposal': dates,
-                            'proctors': Proctors.objects.get(id=proctor_id[each]),
-                            'proctor_order': each + 1
+                            "porposal": dates,
+                            "proctors": Proctors.objects.get(id=proctor_id[each]),
+                            "proctor_order": each + 1,
                         }
                         ProctorshipProctors.objects.create(**proctors)
 
@@ -181,7 +224,10 @@ class ProctorshipSerializer(serializers.ModelSerializer):
             li = []
             user_name = obj.proctorship_id.all()
             for each in user_name:
-                da = {'proctor_name': each.proctors.user.name, 'order': each.proctor_order}
+                da = {
+                    "proctor_name": each.proctors.user.name,
+                    "order": each.proctor_order,
+                }
                 li.append(da)
             return li
         except:
@@ -189,7 +235,9 @@ class ProctorshipSerializer(serializers.ModelSerializer):
 
     def get_trainees(self, obj):
         try:
-            return TrainSerializer(obj.trainee_proctorship.filter(proctorship__id=obj.id), many=True).data
+            return TrainSerializer(
+                obj.trainee_proctorship.filter(proctorship__id=obj.id), many=True
+            ).data
         except:
             return None
 
@@ -222,10 +270,8 @@ class ProctorshipViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Proctorship
-        # fields = ['id', 'user', 'country', 'zone_country_id','zone_countries', 'hospital', 'is_global', 'product', 'product_id',
-        #           'training_type','number_of_cases', 'other_num_of_implants','secondary_product', 'note', 'hotel', 'transplant_time', 'status', 'country_id', 'hospital_id', 'types_of_first_training','type_advance_training','other_advanced_training','specific_training','not_implant_regularly','new_center']
-
         fields = "__all__"
+
     def get_country(self, obj):
         try:
             return obj.country.name
@@ -274,17 +320,6 @@ class ProctorshipViewSerializer(serializers.ModelSerializer):
         except:
             return None
 
-    # def get_proctor(self, obj):
-    #     try:
-    #         li = []
-    #         user_name = obj.proctorship_id.all()
-    #         for each in user_name:
-    #             da = {'proctor_name': each.proctors.user.name, 'order': each.proctor_order, 'id': each.proctors.id}
-    #             li.append(da)
-    #         return li
-    #     except:
-    #         return None
-
     def get_user(self, obj):
         try:
             return obj.user.name
@@ -311,8 +346,7 @@ class ConstantDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ConstantData
-        fields = ['id', 'name', 'code', 'field']
-
+        fields = ["id", "name", "code", "field"]
 
 
 class ProctorshipListingViewSerializer(serializers.ModelSerializer):
@@ -347,10 +381,9 @@ class ProctorshipListingViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Proctorship
-        # fields = ['id', 'user', 'country', 'zone_country_id','zone_countries', 'hospital', 'is_global', 'product', 'product_id',
-        #           'training_type','number_of_cases', 'other_num_of_implants','secondary_product', 'note', 'hotel', 'transplant_time', 'status', 'country_id', 'hospital_id', 'types_of_first_training','type_advance_training','other_advanced_training','specific_training','not_implant_regularly','new_center']
 
         fields = "__all__"
+
     def get_country(self, obj):
         try:
             return obj.country.name
@@ -405,7 +438,6 @@ class ProctorshipListingViewSerializer(serializers.ModelSerializer):
         except:
             return None
 
-
     def get_user(self, obj):
         try:
             return obj.user.name
@@ -420,19 +452,32 @@ class ProctorshipListingViewSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         try:
-            return StatusViewSerializer(obj.proctorship_status.latest("timestamp")).data['code']
+            return StatusViewSerializer(
+                obj.proctorship_status.latest("timestamp")
+            ).data["code"]
         except:
             return None
 
     def get_proctor(self, obj):
         try:
-            return ProctorshipProctorsSerializer(obj.proctorship_status.filter(alter_proctorship_porposal__isnull=False).latest('created_on').alter_proctorship_porposal.filter(proctor_porposal__isnull=False).latest('created_on').proctor_porposal.filter(status = True), many=True).data
+            return ProctorshipProctorsSerializer(
+                obj.proctorship_status.filter(alter_proctorship_porposal__isnull=False)
+                .latest("created_on")
+                .alter_proctorship_porposal.filter(proctor_porposal__isnull=False)
+                .latest("created_on")
+                .proctor_porposal.filter(status=True),
+                many=True,
+            ).data
         except:
             return None
 
     def get_date(self, obj):
         try:
-            return obj.proctorship_status.filter(alter_proctorship_porposal__isnull=False).latest('created_on').alter_proctorship_porposal.get().start_date
+            return (
+                obj.proctorship_status.filter(alter_proctorship_porposal__isnull=False)
+                .latest("created_on")
+                .alter_proctorship_porposal.get()
+                .start_date
+            )
         except:
             return None
-

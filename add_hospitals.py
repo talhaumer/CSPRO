@@ -1,35 +1,32 @@
-from datetime import datetime
 import json
 import os
+
 import django
-
-from django.utils.text import slugify
-
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cspro.settings.settings")
 django.setup()
 
-import threading
 import csv
+import threading
+
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.db import transaction
-from api.zone.models import Countries
+
 from api.models import Hospital, HospitalCountires
-
-from django.utils.text import slugify
-
+from api.zone.models import Countries
 
 
 def add_hospitals_thread():
     t1 = threading.Thread(target=hospitals())
     t1.start()
 
+
 def hospitals():
     try:
         print("==========Add Hospitals=============")
-        file_path = staticfiles_storage.path('hospital.csv')
+        file_path = staticfiles_storage.path("hospital.csv")
         with open(file_path) as csv_file:
-            zone = csv.reader(csv_file, delimiter=',')
+            zone = csv.reader(csv_file, delimiter=",")
             line_count = 0
             for row in zone:
                 if line_count == 0:
@@ -42,12 +39,13 @@ def hospitals():
                         print("hospitals Already Existed")
                     line_count += 1
     except Exception as e:
-        print(f'Error : {e}')
+        print(f"Error : {e}")
         return e
+
 
 def get_or_create_country(data):
     try:
-        hospital = Hospital.objects.get(id = int(data[9]))
+        hospital = Hospital.objects.get(id=int(data[9]))
         return False
     except Hospital.DoesNotExist:
         hospital_name = str(data[0])
@@ -58,12 +56,9 @@ def get_or_create_country(data):
         if int(data[5]) == 0:
             is_it_preceptorship = False
 
-
-
         qualified_for_news_mics_program = True
         if int(data[6]) == 0:
             qualified_for_news_mics_program = False
-
 
         cognos_id = data[7]
 
@@ -78,13 +73,24 @@ def get_or_create_country(data):
         print(is_it_preceptorship, qualified_for_news_mics_program, deleted)
 
         with transaction.atomic():
-            hospitals = Hospital.objects.create(**{"id":hospital_id,"hospital_name":hospital_name,"number_of_trainee":number_of_trainee,"location":location,"is_it_preceptorship":is_it_preceptorship,"qualified_for_news_mics_program":qualified_for_news_mics_program,"cognos_id":cognos_id,"deleted":deleted})
+            hospitals = Hospital.objects.create(
+                **{
+                    "id": hospital_id,
+                    "hospital_name": hospital_name,
+                    "number_of_trainee": number_of_trainee,
+                    "location": location,
+                    "is_it_preceptorship": is_it_preceptorship,
+                    "qualified_for_news_mics_program": qualified_for_news_mics_program,
+                    "cognos_id": cognos_id,
+                    "deleted": deleted,
+                }
+            )
 
             hospitals.products.add(*products)
             try:
                 obj = {}
-                obj['country'] = Countries.objects.get(id=country)
-                obj['hospital'] = hospitals
+                obj["country"] = Countries.objects.get(id=country)
+                obj["hospital"] = hospitals
                 HospitalCountires.objects.create(**obj)
             except:
                 pass
@@ -92,7 +98,6 @@ def get_or_create_country(data):
             return True
     except:
         return False
-
 
 
 add_hospitals_thread()

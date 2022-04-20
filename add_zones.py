@@ -1,31 +1,33 @@
 import json
 import os
-import django
 
+import django
 from django.utils.text import slugify
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cspro.settings.settings")
 django.setup()
 
-import threading
 import csv
+import threading
+
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.db import transaction
-from api.zone.models import Zone, ZoneCountries, Countries
 from django.utils.text import slugify
 
+from api.zone.models import Countries, Zone, ZoneCountries
 
 
 def add_zones_thread():
     t1 = threading.Thread(target=zones())
     t1.start()
 
+
 def zones():
     try:
         print("==========Add Zone=============")
-        file_path = staticfiles_storage.path('zone.csv')
+        file_path = staticfiles_storage.path("zone.csv")
         with open(file_path) as csv_file:
-            zone = csv.reader(csv_file, delimiter=',')
+            zone = csv.reader(csv_file, delimiter=",")
             line_count = 0
             for row in zone:
                 if line_count == 0:
@@ -38,8 +40,9 @@ def zones():
                         print("Zone Already Existed")
                     line_count += 1
     except Exception as e:
-        print(f'Error : {e}')
+        print(f"Error : {e}")
         return e
+
 
 def get_or_create_country(zone_data):
     zone_name = zone_data[0]
@@ -58,10 +61,11 @@ def get_or_create_country(zone_data):
     except Zone.DoesNotExist:
         print("No Zone Found")
         with transaction.atomic():
-            zone = Zone.objects.create(id = zone_id,name = zone_name)
+            zone = Zone.objects.create(id=zone_id, name=zone_name)
             for each in zone_countries:
-                zone_countries = ZoneCountries.objects.create(zone = zone,
-                                             countries = Countries.objects.get(id = int(each)))
+                zone_countries = ZoneCountries.objects.create(
+                    zone=zone, countries=Countries.objects.get(id=int(each))
+                )
 
             zone.save()
             return True
